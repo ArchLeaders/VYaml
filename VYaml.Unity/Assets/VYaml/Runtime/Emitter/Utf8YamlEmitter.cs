@@ -126,6 +126,16 @@ namespace VYaml.Emitter
                         case EmitState.BlockMappingKey:
                             throw new YamlEmitterException(
                                 "To start block-sequence in the mapping key is not supported.");
+
+                        case EmitState.BlockMappingValue: {
+                            var output = writer.GetSpan(GetTagLength() + 1);
+                            var offset = 0;
+                            if (TryWriteTag(output, ref offset)) {
+                                output[offset++] = YamlCodes.Space;
+                            }
+                            writer.Advance(offset);
+                            break;
+                        }
                     }
 
                     PushState(EmitState.BlockSequenceEntry);
@@ -137,7 +147,6 @@ namespace VYaml.Emitter
                     {
                         case EmitState.BlockMappingKey:
                             throw new YamlEmitterException("To start flow-sequence in the mapping key is not supported.");
-
                         case EmitState.BlockSequenceEntry:
                         {
                             var output = writer.GetSpan(currentIndentLevel * options.IndentWidth + BlockSequenceEntryHeader.Length + 1);
